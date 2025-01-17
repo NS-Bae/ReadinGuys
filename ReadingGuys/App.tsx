@@ -23,7 +23,7 @@ const App: React.FC = () => {
       await notifee.createChannel({
         id : 'default',
         name : 'Default Channel',
-        importance : notifee.AndroidImportance.HIGH,
+        importance : notifee.AndroidImportance.HIGH, 
       });
     };
     createNotificationChannel();

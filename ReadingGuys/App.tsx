@@ -3,16 +3,16 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import messaging from '@react-native-firebase/messaging';
+import { useEffect } from 'react';
+import { Alert } from 'react-native';
+import axios from 'axios';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
 import HomeScreen from './screens/homeScreen';
 import LoginScreen from './screens/loginScreen';
 import MainScreen from './screens/mainScreen2';
 
 import { StackParamList } from './types';
-import { useEffect } from 'react';
-import { Alert } from 'react-native';
-import axios from 'axios';
-import notifee from '@notifee/react-native';
 
 const Stack = createNativeStackNavigator<StackParamList>();
 
@@ -20,11 +20,18 @@ const App: React.FC = () => {
   useEffect(() => {
     // 알림 채널 생성
     const createNotificationChannel = async () => {
-      await notifee.createChannel({
-        id : 'default',
-        name : 'Default Channel',
-        importance : notifee.AndroidImportance.HIGH, 
-      });
+      try
+      {
+        await notifee.createChannel({
+          id: 'default',
+          name: 'Default Channel',
+          importance: AndroidImportance.DEFAULT,  // 중요도 설정
+        });
+      }
+      catch (error)
+      {
+        console.error('알림 채널 생성 오류', error);
+      }
     };
     createNotificationChannel();
 
@@ -49,31 +56,45 @@ const App: React.FC = () => {
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-      if (enabled) {
+      if (enabled)
+      {
         console.log('푸시 알림 권한 획득');
         fetchDeviceToken();
-      } else {
+      }
+      else
+      {
         Alert.alert('알림 권한이 필요합니다.');
       }
     };
     requestPermission();
 
-    // Foreground 알림 처리
+    //알림 클릭 처리
+    messaging().onNotificationOpenedApp((remoteMessage) => {
+      console.log('알림 클릭됨', remoteMessage);
+      Alert.alert('알림 클릭', remoteMessage.notification?.title || '제목 없음');
+    });
+
+    /* // Foreground 알림 처리
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('Foreground Notification:', remoteMessage);
       Alert.alert(
         '새 알림aaa',
         remoteMessage.notification?.title || '알림 제목 없음',
       );
-    });
+    }); */
 
     //backbround 알림처리
-    const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp((remoteMessage) => {
-      console.log('백그라운드 알림');
-      Alert.alert(
-        '알림 클릭',
-        remoteMessage.notification?.title || '제목없음',
-      );
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      console.log('백그라운드 알림', remoteMessage);
+      await notifee.displayNotification({
+        title: remoteMessage.notification?.title || '알림 제목',
+        body: remoteMessage.notification?.body || '알림내용',
+        android: {
+          channelId: 'default',
+          importance: AndroidImportance.HIGH,
+          smallIcon: 'ic_launcher',
+        },
+      });
     });
 
     //종료상태 알림 처리
@@ -87,7 +108,6 @@ const App: React.FC = () => {
 
     return () => {
       unsubscribe();
-      unsubscribeNotificationOpened();
     };
   }, []);
 

@@ -6,6 +6,8 @@ import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { WorkbooksModule } from './workbook/workbooks.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { AcademyModule } from './academy/academy.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -13,6 +15,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     UsersModule,
     WorkbooksModule,
     FirebaseModule,
+    AcademyModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
@@ -31,6 +34,7 @@ import { FirebaseModule } from './firebase/firebase.module';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '60s' },
     }),
+    ScheduleModule.forRoot(),
   ],
   controllers: [],
   providers: [],

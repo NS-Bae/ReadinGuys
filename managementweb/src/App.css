@@ -20,9 +20,9 @@
 
 .basicspace 
 {
-  min-height: 72vh;
+  min-height: 66vh;
   width: 95%;
-  height: 90%;
+  max-height: 90%;
   background: white;
   border-radius: 20px;
   display: flex;
@@ -137,4 +137,27 @@ h1
 .test_btn:hover
 {
   color: black;
+}
+
+.btn_section
+{
+  display: flex;
+  min-height: 6vh;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+.normal_btn
+{
+  background-color: white;
+  border: 0;
+  text-align: center;
+  font-size: 1.3em;
+  font-weight: bold;
+  cursor: pointer;
+}
+.normal_btn:hover
+{
+  color: #ffa600;
 }

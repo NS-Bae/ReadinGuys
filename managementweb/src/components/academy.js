@@ -1,27 +1,47 @@
 import '../App.css';
-import React, { useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useCallback } from 'react';
 
-const Academy = () => {
-  async function getStudent()
-  {
-    try
+import api from '../api';
+import Table from './table';
+
+const Academy = ({forceRender, handleCheckboxChange}) => {
+  const [academy, setAcademy] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const columns = [
+    { key: "1", label: "학원 ID" },
+    { key: "2", label: "학원 이름" },
+    { key: "3", label: "구독 여부" },
+    { key: "4", label: "구독 시작일" },
+    { key: "5", label: "구독 종료일" },
+  ];
+
+  const getAcademyList = useCallback(async () => {
+    setLoading(true);
+    try 
     {
-      const response = await axios.get('http://localhost:3000/academy/totallist');
-      console.log('성공', response.data);
-    }
+      const response = await api.get('/academy/totallist');
+      const convertData = response.data.map(item => ({
+        i1: item.academyId,
+        i2: item.academyName,
+        i3: item.paymentStatus ? "지불" : "미지불",
+        i4: item.startMonth,
+        i5: item.endMonth,
+      }));
+      setAcademy(convertData);
+    } 
     catch(error)
     {
-      console.error('실패', error);
+      console.error('데이터 로딩 실패', error);
     }
-  };
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
-    getStudent();
-  });
+    getAcademyList();
+  }, [forceRender, getAcademyList]);
+
   return (
-    <div className='basicspace'>
-      <p>aca</p>
-    </div>
+    loading ? <p>데이터 불러오는 중...</p> : <Table columns = {columns} info = {academy} handleCheckboxChange = {handleCheckboxChange} />
   )
 };
 

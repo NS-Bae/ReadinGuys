@@ -1,8 +1,8 @@
 import '../App.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
+import api from '../api';
 import MainLogo from '../components/main_logo';
 // AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
@@ -33,7 +33,7 @@ function LoginForm(props) {
 
     try
     {
-      const response = await axios.post('http://localhost:3000/auth/login',inputs);
+      const response = await api.post('/auth/login',inputs);
 
       console.log('성공', response.data);
       navigate("managementPage");

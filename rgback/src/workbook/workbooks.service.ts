@@ -39,6 +39,12 @@ export class WorkbookService {
     });
     return workbooks;
   }
+  //전체 문제집 불러오기
+  async getWorkbookTotalList()
+  {
+    const workbooks = await this.workbookRepository.find();
+    return workbooks;
+  }
   //workbookDownload
   async getWorkbookDownload(storageLink: string): Promise<string>
   {

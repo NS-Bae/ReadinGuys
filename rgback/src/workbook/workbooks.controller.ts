@@ -15,6 +15,13 @@ export class WorkbookController {
     return workbooks;
   }
 
+  @Get('totallist')
+  async getTotalList()
+  {
+    const workbooks = await this.workbookService.getWorkbookTotalList();
+    return workbooks;
+  }
+
   @Post('download')
   async downloadBook(@Body('storageLink') storageLink : string, @Res() res : Response)
   {

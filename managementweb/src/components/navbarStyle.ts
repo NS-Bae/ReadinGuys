@@ -13,7 +13,7 @@ const navbarStyles = {
     display: "flex",
     color: "white",
     "&:hover": {
-      backgroundColor: "rgb(200, 130, 0)",
+      color: "rgb(200, 130, 0)",
     },
     fontSize:'1.5rem',
   },

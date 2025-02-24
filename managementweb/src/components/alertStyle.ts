@@ -1,5 +1,3 @@
-import { display } from "@mui/system";
-
 const alertStyle = {
   modalOverlay: {
     position: 'fixed',

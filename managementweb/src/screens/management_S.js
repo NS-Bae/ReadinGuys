@@ -9,6 +9,7 @@ import Student from '../components/student';
 import Workbook from '../components/workbook';
 import CustomModal from '../components/alert';
 import AddModal from '../components/bigmodal';
+import ChangeModal from '../components/midmodal';
 
 function MyApp() {
   const [category, setCategory] = useState('basic');
@@ -16,6 +17,7 @@ function MyApp() {
   const [checkedRows, setCheckedRows] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBigModalOpen, setIsBigModalOpen] = useState(false);
+  const [isMidModalOpen, setIsMidModalOpen] = useState(false);
   const [forceRender, setForceRender] = useState(0);
 
   let link = '';
@@ -42,15 +44,44 @@ function MyApp() {
   };
 
   const handleAddConfirm = (data) => {
-    console.log("확인 버튼을 클릭", data);
-    setIsBigModalOpen(false);
-    if(data.length === 0)
-    { 
-      alert("추가할 정보가 없습니다.");
+    if(category === 'management_workbook')
+    {
+      console.log("확인 버튼을 클릭", data, data.length);
+      if(data.length === 1)
+      { 
+        alert("추가할 정보가 없습니다.");
+      }
+      else
+      {
+        const formData = new FormData();
+
+        data.forEach((item) => {
+          if(item.id && item.value)
+          {
+            formData.append(item.id, item.value);
+          }
+        });
+
+        const fileItem = data.find((item) => item instanceof File);
+        if(fileItem)
+        {
+          formData.append("file", fileItem);
+        };
+        addData(formData);
+      }
     }
     else
     {
-      addData(data);
+      console.log("확인 버튼을 클릭", data);
+      setIsBigModalOpen(false);
+      if(data.length === 0)
+      { 
+        alert("추가할 정보가 없습니다.");
+      }
+      else
+      {
+        addData(data);
+      }
     }
   };
   const handleAddCancel = () => {
@@ -58,13 +89,37 @@ function MyApp() {
     setIsBigModalOpen(false);
   };
 
+  const handleChangeConfirm = (data) => {
+    console.log("확인 버튼을 클릭", data);
+    setIsMidModalOpen(false);
+    if(data.length === 0)
+    { 
+      alert("추가할 정보가 없습니다.");
+    }
+    else
+    {
+      const convertedData = Object.keys(data).map(key => {
+        const userInfo = data[key];
+        const result = { id: key, ...userInfo };
+        return result;
+      });
+
+      changeData(convertedData);
+    }
+    setCheckedRows([]);
+  };
+  const handleChangeCancel = () => {
+    console.log("취소 버튼을 클릭", isBigModalOpen);
+    setIsMidModalOpen(false);
+    setForceRender((prev) => prev + 1);
+    setCheckedRows([]);
+  }
+
   const onNavbarButtonClick = (e) => {
     setCategory(e.target.id);
     setCheckedRows([]);
   };
   const handleCheckboxChange = (event, key) => {
-    console.log(event.target.checked, key);
-
     const ischecked = event.target.checked;
     const [data1, data2] = key.split('_');
 
@@ -82,9 +137,17 @@ function MyApp() {
     setIsBigModalOpen(true);
   };
   const clickDeleteButton = (e) => {
-    setButtonId(e.target.id);
-    setIsModalOpen(true);
-    console.log('delete', checkedRows, buttonId);
+    if(e.target.id === 'delete' || e.target.id === 'novation')
+    {
+      console.log(e.target.id);
+      setButtonId(e.target.id);
+      setIsModalOpen(true);
+    }
+    else
+    {
+      console.log('a',e.target.id);
+      setIsMidModalOpen(true);
+    }
   };
   
 
@@ -143,22 +206,63 @@ function MyApp() {
     };
     console.log(data);
 
+    if(category === "management_workbook")
+    {
+      try
+      {
+        const response = await api.post(`/${link}/adddata`, data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        
+        alert(`${response.data.addedCount}개의 정보를 추가했습니다`);
+        setForceRender((prev) => prev + 1);
+      }
+      catch(error)
+      {
+        console.log("추가 실패", error);
+      }
+    }
+    else
+    {
+      try
+      {
+        const response = await api.post(`/${link}/adddata`, {
+          data,
+        });
+        console.log("추가 성공", response.data);
+        alert(`${response.data.addedCount}개의 정보를 추가했습니다`);
+
+        setForceRender((prev) => prev + 1);
+      }
+      catch(error)
+      {
+        console.log("추가 실패", error);
+      }
+    }
+  };
+  async function changeData(data)
+  {
+    switch(category)
+    {
+      case "management_student" : link = 'users'; break;
+      case "management_workbook" : link = 'workbook'; break;
+      default: link = ''; break;
+    };
     try
     {
-      const response = await api.post(`/${link}/adddata`, {
-        data,
-      });
+      const response = await api.post(`/${link}/changedata`, { data });
       console.log("추가 성공", response.data);
-      alert(`${response.data.addedCount}개의 정보를 추가했습니다`);
+      alert(`${response.data.updatedCount}개의 정보를 변경했습니다`);
 
       setForceRender((prev) => prev + 1);
     }
     catch(error)
     {
-      console.log("추가 실패", error);
+      console.log("데이터를 변경하는데 실패했습니다.", error);
     }
   };
-
   return (
     <div className="background">
       <div className="wrap">
@@ -181,6 +285,9 @@ function MyApp() {
           {category === "management_academy" && (
             <button id='novation' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >구독 갱신</button>
           )}
+          {category === "management_student" && (
+            <button id='changePW' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >비밀번호 변경</button>
+          )}
             <button id='add' className='normal_btn' onClick = {clickAddButton} >새로 추가하기</button>
             <button id='delete' className='normal_btn' onClick = {clickDeleteButton} disabled = {checkedRows.length === 0} >삭제하기</button>
           </>
@@ -197,6 +304,13 @@ function MyApp() {
         isOpen={isBigModalOpen}
         onConfirm={handleAddConfirm}
         onCancel={handleAddCancel}
+        category={category}
+      />
+      <ChangeModal
+        isOpen={isMidModalOpen}
+        onConfirm={handleChangeConfirm}
+        onCancel={handleChangeCancel}
+        checkedRow={checkedRows}
         category={category}
       />
     </div>

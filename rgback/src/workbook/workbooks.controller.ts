@@ -1,6 +1,11 @@
-import { Controller, Query, Get, Res, Body, Post, BadRequestException } from '@nestjs/common';
-import { WorkbookService } from './workbooks.service';
+import { Controller, Query, Get, Res, Body, Post, BadRequestException, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Multer } from "multer";
+
+import { WorkbookService } from './workbooks.service';
+import { UploadBookDto } from '../dto/uploadWorkbook.dto';
+import { multerConfig } from './multer.config';
 
 @Controller('workbook')
 export class WorkbookController {
@@ -32,5 +37,14 @@ export class WorkbookController {
     const bookLink = await this.workbookService.getWorkbookDownload(storageLink);
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(storageLink)}"`);
     res.sendFile(bookLink);
+  }
+  @Post('adddata')
+  @UseInterceptors(FileInterceptor("file", multerConfig))
+  async uploadBook(
+    @Body() data: UploadBookDto,
+    @UploadedFile() file: Multer.File
+)
+  {
+    return this.workbookService.uploadWorkbookFile(data, file);
   }
 }

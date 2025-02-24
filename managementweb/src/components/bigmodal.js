@@ -3,9 +3,12 @@ import React, { useState, useEffect } from 'react';
 import styles from './alertStyle.ts';
 import '../App.css';
 import RegistTable from './registTable';
+import RegistBookForm from './registbook.js';
 
 const AddModal = ({ isOpen, onConfirm, onCancel, category }) => {
   const [rowCount, setRowCount] = useState(1);
+  const [resetTrigger, setResetTrigger] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [tableData, setTableData] = useState([]);
   const studentColumns = [
     { key: "1", label: "ID", type: 'text' },
@@ -53,8 +56,22 @@ const AddModal = ({ isOpen, onConfirm, onCancel, category }) => {
     setTableData(data);
   };
   const handleConfirm = () => {
-    console.log(tableData);
-    onConfirm(tableData);
+    if(category === 'management_workbook')
+    {
+      setResetTrigger((prev) => prev + 1);
+      console.log(resetTrigger, tableData);
+      onConfirm(tableData);
+    }
+    else
+    {
+      console.log(tableData);
+      onConfirm(tableData);
+    }
+  };
+  const handleClickConfirm = (row, file) => {
+    console.log(row, file);
+    const data = row.concat(file);
+    setTableData(data);
   };
 
   return (
@@ -62,15 +79,20 @@ const AddModal = ({ isOpen, onConfirm, onCancel, category }) => {
       <div style={styles.bigmodalContent}>
         <div style={styles.contentplace}>
           <h2>{convertEnglish(category)} 추가하기</h2>
-          <div style={styles.modalButtonPlace}>
-            <button id='add' onClick={managementLow} className='normal_btn'>줄 추가</button>
-            <button id='delete' onClick={managementLow} className='normal_btn' disabled={rowCount === 0}>줄 삭제</button>
-          </div>
+          {category !== 'management_workbook' && (
+            <div style={styles.modalButtonPlace}>
+              <button id='add' onClick={managementLow} className='normal_btn'>줄 추가</button>
+              <button id='delete' onClick={managementLow} className='normal_btn' disabled={rowCount === 0}>줄 삭제</button>
+            </div>
+          )}
           {category === 'management_academy' && (
             <RegistTable onDataChange={handleTableDataChange} columnInfo={academyColumns} rowCount={rowCount} parentOptions={parentOptions} />
           )}
           {category === 'management_student' && (
             <RegistTable onDataChange={handleTableDataChange} columnInfo={studentColumns} rowCount={rowCount} parentOptions={parentOptions}/>
+          )}
+          {category === 'management_workbook' && (
+            <RegistBookForm key={resetTrigger} onClickConfirm={handleClickConfirm} resetTrigger={resetTrigger} />
           )}
         </div>
         <div style={styles.modalButtonPlace}>

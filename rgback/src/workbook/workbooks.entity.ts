@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 export enum Difficulty {
   쉬움 = 'easy',
-  중간 = 'normal',
+  보통 = 'normal',
   어려움 = 'hard',
 }
 

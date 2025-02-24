@@ -1,18 +1,16 @@
 import { IsArray, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class NewAcademyDto 
-{
+class CheckedRowDto {
   @IsString()
   data1: string;
   @IsString()
   data2: string;
 };
 
-export class AddNewAcademyDto
-{
+export class SearchUsersDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => NewAcademyDto)
-  data: NewAcademyDto[];
-}
+  @Type(() => CheckedRowDto)
+  checkedRow: CheckedRowDto[];
+};

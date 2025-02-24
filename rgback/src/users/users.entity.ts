@@ -4,11 +4,14 @@ import {
   PrimaryColumn,
   ManyToOne,
   JoinColumn,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Academy } from '../academy/academy.entity'; // Academy 엔티티를 만든 경우
 
 export enum UserType {
-  원장 = '원장',
+  관리자 = '관리자',
   교사 = '교사',
   학생 = '학생',
 }
@@ -21,11 +24,14 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: false })
   password: string;
 
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+
   @Column({ type: 'varchar', length: 100, nullable: false })
   userName: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  academyId: string;
 
   @ManyToOne(() => Academy, (academy) => academy.academyId, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'AcademyID' })

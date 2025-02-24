@@ -20,10 +20,9 @@ const Student = ({forceRender, handleCheckboxChange}) => {
     try
     {
       const response = await api.get('/users');
-      console.log('성공', response.data);
       
       const convertData = response.data.map((item) => ({
-        i1: item.academyId,
+        i1: item.academy.academyId,
         i2: item.id,
         i3: item.userName,
         i4: item.userType,

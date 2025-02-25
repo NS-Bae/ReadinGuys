@@ -1,10 +1,11 @@
-import { Controller, Query, Get, Res, Body, Post, BadRequestException, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Query, Get, Res, Body, Post, BadRequestException, UseInterceptors, UploadedFile, Delete } from '@nestjs/common';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Multer } from "multer";
 
 import { WorkbookService } from './workbooks.service';
 import { UploadBookDto } from '../dto/uploadWorkbook.dto';
+import { DeleteCheckedDto } from '../dto/deleteChecked.dto';
 import { multerConfig } from './multer.config';
 
 @Controller('workbook')
@@ -43,8 +44,13 @@ export class WorkbookController {
   async uploadBook(
     @Body() data: UploadBookDto,
     @UploadedFile() file: Multer.File
-)
+    )
   {
     return this.workbookService.uploadWorkbookFile(data, file);
+  }
+  @Delete('deletedata')
+  async deleteBook(@Body() deleteCheckedRow: DeleteCheckedDto)
+  {
+    return this.workbookService.deleteWorkbook(deleteCheckedRow);
   }
 }

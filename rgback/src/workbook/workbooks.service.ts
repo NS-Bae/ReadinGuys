@@ -1,6 +1,6 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { MoreThan, Repository } from "typeorm";
+import { DataSource, MoreThan, Repository } from "typeorm";
 import * as path from "path";
 import * as fs from "fs";
 import { Multer } from 'multer';
@@ -12,6 +12,8 @@ import { Workbook } from './workbooks.entity';
 import { Academy } from '../academy/academy.entity';
 import { FirebaseService } from '../firebase/firebase.service';
 import { UploadBookDto } from '../dto/uploadWorkbook.dto';
+import { DeleteCheckedDto } from '../dto/deleteChecked.dto';
+import { unlink } from "fs/promises";
 
 @Injectable()
 export class WorkbookService {
@@ -22,6 +24,7 @@ export class WorkbookService {
     @InjectRepository(Academy)
     private academyRepository: Repository<Academy>,
     private readonly firebaseService : FirebaseService,
+    private dataSource: DataSource,
     /* private readonly awsS3Service: AwsS3Service, */
   ) {}
   //booklist update
@@ -63,7 +66,7 @@ export class WorkbookService {
 
     return filePath;
   }
-  //workbook upload
+  //workbook upload push alert
   async uploadWorkbook(data)
   {
     console.log('문제집 업로드 완료');
@@ -74,17 +77,16 @@ export class WorkbookService {
 
     await this.firebaseService.sendNotification(userDeviceToken, title, body);
   }
-
+  //workbook upload(local)(aws s3대응준비 완료)
   async uploadWorkbookFile(data: UploadBookDto, file: Multer.file)
   {
-    console.log("📌 받은 데이터:", data);
-    console.log("📁 받은 파일:", file?.originalname);
+    const queryRunner = this.dataSource
 
     let filePath = null;
 
     if(file)
     {
-      filePath = join(__dirname, "..", "..", "uploads", file.filename);
+      filePath = join(process.cwd(), "uploads", file.filename);
       console.log("📂 파일 저장 경로:", filePath);
     }
     /* // AWS S3로 업로드
@@ -104,5 +106,89 @@ export class WorkbookService {
 
     const savedWorkbook = await this.workbookRepository.save(newWorkbook);
     return { message: "업로드 완료!", data: savedWorkbook };
+  }
+  //문제집 삭제
+  async deleteWorkbook(deleteCheckedDto: DeleteCheckedDto): Promise<{ deletedCount: number }>
+  {
+    const { checkedRows } = deleteCheckedDto;
+    if(checkedRows.length === 0)
+    {
+      throw new NotFoundException('삭제할 데이터가 없습니다.');
+    }
+    //Transaction 시작
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try
+    {
+      const workbooks = await queryRunner.manager
+        .createQueryBuilder(Workbook, 'workbook')
+        .select('workbook.storageLink')
+        .where('workbook.workbookId IN (:...workbookIds)', {
+          workbookIds: checkedRows.map((item) => item.data1),
+        })
+        .getMany();
+
+      if(workbooks.length === 0)
+      {
+        console.log('삭제할 문제집이 없습니다.');
+        await queryRunner.rollbackTransaction();
+        return ;
+      }
+      //저장소에 저장된 workbook삭제
+      for(const workbook of workbooks)
+      {
+        //로컬(배포시 삭제)
+        if(workbook.storageLink)
+        {
+          try
+          {
+            const filePath = join(workbook.storageLink);
+            await unlink(filePath);
+            console.log(`📂 로컬 파일 삭제 완료`);
+          }
+          catch(error)
+          {
+            console.error(`❌ 로컬 파일 삭제 실패: ${workbook.storageLink}`, error);
+            throw new InternalServerErrorException('파일 삭제 중 오류 발생');
+          }
+        }
+        //aws s3용 배포시 활성화
+        /* if(workbook.storageLink)
+        {
+          try
+          {
+            await this.awsS3Service.deleteFile(workbook.storageLink);
+            console.log(`📂 파일 삭제 완료`);
+          }
+          catch(error)
+          {
+            console.error('❌ 파일 삭제 실패', error);
+            throw new InternalServerErrorException('AWS S3 파일 삭제 중 오류 발생');
+          }
+        } */
+      }
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(Workbook)
+        .where('workbookId IN (:...workbookIds)', {
+          workbookIds: checkedRows.map((item) => item.data1),
+        })
+        .execute();
+
+      await queryRunner.commitTransaction();
+
+      return { deletedCount: workbooks.length };
+    }
+    catch(error)
+    {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('데이터 삭제중 오류가 발생했습니다.');
+    }
+    finally
+    {
+      await queryRunner.release();
+    }
   }
 }

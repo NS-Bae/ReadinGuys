@@ -163,6 +163,7 @@ function MyApp() {
 
     try
     {
+      console.log(checkedRows);
       const response = await api.delete(`/${link}/deletedata`, {
         data: {checkedRows},
       });

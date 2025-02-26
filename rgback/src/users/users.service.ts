@@ -1,11 +1,13 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Repository, DataSource } from 'typeorm';
+
 import { User } from './users.entity';
 import { Academy } from '../academy/academy.entity';
 import { AddNewUserDto } from '../dto/createUser.dto';
 import { SearchUsersDto } from '../dto/searchUser.dto';
 import { UpdateUsersDto } from '../dto/updateUser.dto';
+import { DeleteCheckedDto } from 'src/dto/deleteChecked.dto';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +15,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private dataSource: DataSource,
   ) {}
 
   async registUser(registUserDto: AddNewUserDto): Promise<{addedCount: number}>
@@ -127,6 +130,48 @@ export class UsersService {
     }
     return { updatedCount }
   }
+
+  async deleteUsers(deleteCheckedDto: DeleteCheckedDto): Promise<{deletedCount: number}>
+  {
+    const { checkedRows } = deleteCheckedDto;
+
+    if(checkedRows.length === 0)
+    {
+      throw new NotFoundException('삭제할 데이터가 없습니다.');
+    }
+
+    //Transaction 시작
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try
+    {
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where('id IN (:...usersIds)', {
+          usersIds: checkedRows.map((item) => item.data2),
+        })
+        .execute();
+
+      await queryRunner.commitTransaction();
+
+      return { deletedCount: checkedRows.length };
+    }
+    catch(error)
+    {
+      await queryRunner.rollbackTransaction();
+
+      throw new InternalServerErrorException('사용자 삭제중 문제가 발생했습니다.');
+    }
+    finally
+    {
+      await queryRunner.release();
+    }
+  }
+
 
   findAll(): Promise<User[]> 
   {

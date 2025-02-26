@@ -5,6 +5,7 @@ import { User } from './users.entity';
 import { AddNewUserDto } from '../dto/createUser.dto';
 import { SearchUsersDto } from '../dto/searchUser.dto';
 import { UpdateUsersDto } from '../dto/updateUser.dto';
+import { DeleteCheckedDto } from '../dto/deleteChecked.dto';
 
 @Controller('users')
 export class UsersController {
@@ -25,11 +26,6 @@ export class UsersController {
     return this.usersService.update(id, userData);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.usersService.remove(id);
-  }
-  
   @Post('adddata')
   async regist(@Body() registUserDto: AddNewUserDto)
   {
@@ -46,5 +42,11 @@ export class UsersController {
   async updateInfo(@Body() updateUsersDto: UpdateUsersDto)
   {
     return this.usersService.updateUsers(updateUsersDto);
+  }
+
+  @Delete('deletedata')
+  async deleteUsers(@Body() deleteCheckedDto: DeleteCheckedDto)
+  {
+    return this.usersService.deleteUsers(deleteCheckedDto);
   }
 }

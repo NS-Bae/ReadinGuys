@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, Logger, NotFoundException } f
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, DataSource } from "typeorm";
 import { Cron } from "@nestjs/schedule";
-import { startOfMonth, endOfMonth } from 'date-fns';
+import { endOfMonth } from 'date-fns';
 
 import { Academy } from "./academy.entity";
 import { User } from "../users/users.entity";

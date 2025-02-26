@@ -1,9 +1,12 @@
 import '../App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 import api from '../api';
 import MainLogo from '../components/main_logo';
+import CustomModal from '../components/alert';
 // AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
   return (
@@ -18,6 +21,7 @@ function LoginForm(props) {
     ip1: '', 
     ip2: ''
   });
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -30,17 +34,15 @@ function LoginForm(props) {
 
   const handleLogin = async(e) => {
     e.preventDefault();
-
     try
     {
-      const response = await api.post('/auth/login',inputs);
-
-      console.log('성공', response.data);
+      const response = await api.post('/auth/manager_login',inputs, {withCredentials: true});
       navigate("managementPage");
     }
     catch(error)
     {
       console.error('실패', error);
+      alert(error.response.data.message);
     }
   }
   return (
@@ -78,12 +80,59 @@ function LoginForm(props) {
   );
 }
 function MyApp() {
+  const [alertMessage, setAlertMessage] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const verifyToken = Cookies.get("access_token");
+    
+    if(!verifyToken)
+    {
+      setAlertMessage('로그인이 필요합니다.');
+      setIsModalOpen(true);
+      navigate("/");
+      return;
+    }
+
+    try 
+    {
+      const decoded = jwtDecode(verifyToken);
+      if (decoded.userType === "관리자") 
+      {
+        setAlertMessage('관리자님 환영합니다.');
+        setIsModalOpen(true);
+        navigate("/managementPage");
+      }
+    } 
+    catch (error) 
+    {
+      console.error("토큰 디코딩 오류:", error);
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const handleConfirm = () => {
+    console.log("확인 버튼을 클릭");
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => {
+    console.log("취소 버튼을 클릭");
+    setIsModalOpen(false);
+  };
   return (
     <div className="background">
       <div className="wrap">
         <MainLogo />
         <LoginForm />
       </div>
+      <CustomModal
+        isOpen={isModalOpen}
+        message={alertMessage}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }

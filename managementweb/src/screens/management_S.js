@@ -1,5 +1,8 @@
 import '../App.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 import api from '../api';
 import MainLogo from '../components/main_logo';
@@ -14,6 +17,7 @@ import ChangeModal from '../components/midmodal';
 function MyApp() {
   const [category, setCategory] = useState('basic');
   const [buttonId, setButtonId] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
   const [checkedRows, setCheckedRows] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBigModalOpen, setIsBigModalOpen] = useState(false);
@@ -21,6 +25,36 @@ function MyApp() {
   const [forceRender, setForceRender] = useState(0);
 
   let link = '';
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const verifyToken = Cookies.get("access_token");
+    
+    if(!verifyToken)
+    {
+      setAlertMessage('로그인이 필요합니다.');
+      setIsModalOpen(true);
+      navigate("/");
+      return;
+    }
+
+    try 
+    {
+      const decoded = jwtDecode(verifyToken);
+
+      if (decoded.userType !== "관리자") 
+      {
+        setAlertMessage('관리자만 접근 할 수 있습니다');
+        setIsModalOpen(true);
+        navigate("/");
+      }
+    } 
+    catch (error) 
+    {
+      console.error("토큰 디코딩 오류:", error);
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleConfirm = () => {
     console.log("확인 버튼을 클릭", buttonId);
@@ -139,7 +173,8 @@ function MyApp() {
   const clickDeleteButton = (e) => {
     if(e.target.id === 'delete' || e.target.id === 'novation')
     {
-      console.log(e.target.id);
+      e.target.id === 'delete' ? setAlertMessage('진짜로 삭제하시겠습니까?') : setAlertMessage('구독을 갱신하겠습니까?') ;
+      console.log(e.target.id, alertMessage);
       setButtonId(e.target.id);
       setIsModalOpen(true);
     }
@@ -297,7 +332,7 @@ function MyApp() {
       </div>
       <CustomModal
         isOpen={isModalOpen}
-        message="이 작업을 수행하시겠습니까?"
+        message={alertMessage}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />

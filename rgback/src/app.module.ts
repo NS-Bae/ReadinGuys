@@ -32,7 +32,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '30m' },
     }),
     ScheduleModule.forRoot(),
   ],

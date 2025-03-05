@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 
 import api from '../api';
 import MainLogo from '../components/main_logo';
+import LoginControl from '../components/loginControl';
 import NavBar from '../components/nav_Bar';
 import Academy from '../components/academy';
 import Student from '../components/student';
@@ -14,11 +15,14 @@ import CustomModal from '../components/alert';
 import AddModal from '../components/bigmodal';
 import ChangeModal from '../components/midmodal';
 
-function MyApp() {
+function MyApp()
+{
   const [category, setCategory] = useState('basic');
   const [buttonId, setButtonId] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+  const [stateId, setStateId] = useState('');
   const [checkedRows, setCheckedRows] = useState([]);
+  const [bookInfo, setBookInfo] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBigModalOpen, setIsBigModalOpen] = useState(false);
   const [isMidModalOpen, setIsMidModalOpen] = useState(false);
@@ -34,7 +38,7 @@ function MyApp() {
     {
       setAlertMessage('로그인이 필요합니다.');
       setIsModalOpen(true);
-      navigate("/");
+      setStateId('notLogin');
       return;
     }
 
@@ -46,16 +50,29 @@ function MyApp() {
       {
         setAlertMessage('관리자만 접근 할 수 있습니다');
         setIsModalOpen(true);
-        navigate("/");
+        setStateId(decoded.userType);
       }
     } 
     catch (error) 
     {
       console.error("토큰 디코딩 오류:", error);
-      navigate("/");
     }
   }, [navigate]);
 
+  const handleLogout = async(e) => {
+    try
+    {
+      const response = await api.post('/auth/logout', {}, {withCredentials: true});
+      setStateId(e.target.id);
+      setAlertMessage('로그아웃에 성공했습니다. 로그아웃 페이지로 넘어갑니다.');
+      setIsModalOpen(true);
+    }
+    catch(error)
+    {
+      console.error("로그아웃 실패:", error);
+      alert("알 수 없는 이유로 로그아웃에 실패했습니다")
+    }
+  };
   const handleConfirm = () => {
     console.log("확인 버튼을 클릭", buttonId);
     setIsModalOpen(false);
@@ -65,14 +82,35 @@ function MyApp() {
     }
     else if(buttonId === 'novation')
     {
-      console.log('a', buttonId, checkedRows);
       novationData();
     }
+    else if(buttonId === "toggle")
+    {
+      console.log(bookInfo);
+      changeData(bookInfo);
+    }
+    if(stateId === 'logout' || stateId === '학생' || stateId === 'notLogin')
+    {
+      navigate('/');
+    }
+    else if(stateId === '교사')
+    {
+      navigate('/forT');
+    }
     setCheckedRows([]);
+    setBookInfo([]);
   };
   const handleCancel = () => {
     console.log("취소 버튼을 클릭");
     setIsModalOpen(false);
+    if(stateId === 'logout' || stateId === '학생' || stateId === 'notLogin')
+    {
+      navigate('/');
+    }
+    else if(stateId === '교사')
+    {
+      navigate('/forT');
+    }
     setForceRender((prev) => prev + 1);
     setCheckedRows([]);
   };
@@ -147,7 +185,7 @@ function MyApp() {
     setIsMidModalOpen(false);
     setForceRender((prev) => prev + 1);
     setCheckedRows([]);
-  }
+  };
 
   const onNavbarButtonClick = (e) => {
     setCategory(e.target.id);
@@ -166,6 +204,14 @@ function MyApp() {
       setCheckedRows((prevCheckedRows) => prevCheckedRows.filter((row) => row.data1 !== data1 && row.data2 !== data2));
     }
   };
+  const handleToggle = (e) => {
+    const [data1, data2] = e.target.id.split('_');
+    setBookInfo((prevBookInfo) => [...prevBookInfo, {data1, data2}]);
+
+    setAlertMessage('문제집의 공개상태를 바꾸겠습니까?');
+    setButtonId('toggle');
+    setIsModalOpen(true);
+  }
   const clickAddButton = () => {
     console.log("add");
     setIsBigModalOpen(true);
@@ -303,16 +349,17 @@ function MyApp() {
     <div className="background">
       <div className="wrap">
         <MainLogo />
+        <LoginControl handleLogout={handleLogout}/>
         <NavBar onButtonClick={onNavbarButtonClick} />
         <div className='basicspace'>
           {category==='management_academy' && (
-            <Academy forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />
+            <Academy category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />
           )}
           {category==='management_student' && (
-            <Student forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />
+            <Student category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />
           )}
           {category==='management_workbook' && (
-            <Workbook forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />
+            <Workbook category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
           )}
         </div>
         <div className='btn_section'>

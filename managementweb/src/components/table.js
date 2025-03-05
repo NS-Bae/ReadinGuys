@@ -1,7 +1,9 @@
 import styles from './tableStyle.ts';
 import React from "react";
 
-const Table = ({columns, info, handleCheckboxChange}) => {
+import ToggleButton from './ToggleButton';
+
+const Table = ({category, columns, info, handleCheckboxChange, handleToggle}) => {
   const onCheckboxChange = (e, key) => {
     handleCheckboxChange(e, key);
   }
@@ -30,7 +32,9 @@ const Table = ({columns, info, handleCheckboxChange}) => {
             <td style={styles.table_data}>{info[i].i2}</td>
             <td style={styles.table_data}>{info[i].i3}</td>
             <td style={styles.table_data}>{info[i].i4}</td>
-            <td style={styles.table_data}>{info[i].i5}</td>
+            <td style={styles.table_data}>
+              {category === 'management_workbook' ? <ToggleButton item={info[i]} handleToggle={handleToggle}/> : info[i].i5 }
+            </td>
           </tr>
         ))}
       </tbody>

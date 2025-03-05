@@ -103,4 +103,10 @@ export class AuthService {
     })
     return res.json({ message: '로그인 성공', accessToken });
   }
+  //로그아웃
+  async logoutAll(res: Response)
+  {
+    res.clearCookie("access_token");
+    res.status(200).json({messgae: '로그아웃 성공'});
+  }
 }

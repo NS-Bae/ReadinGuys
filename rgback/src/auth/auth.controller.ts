@@ -19,5 +19,10 @@ export class AuthController {
   {
     await this.authService.managerLogin(loginDto, res);
   }
-
+  //로그아웃
+  @Post('logout')
+  async logout( @Res() res: Response)
+  {
+    await this.authService.logoutAll(res);
+  }
 }

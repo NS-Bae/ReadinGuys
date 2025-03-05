@@ -13,6 +13,7 @@ import { Academy } from '../academy/academy.entity';
 import { FirebaseService } from '../firebase/firebase.service';
 import { UploadBookDto } from '../dto/uploadWorkbook.dto';
 import { DeleteCheckedDto } from '../dto/deleteChecked.dto';
+import { UpdateBookPaidDto } from '../dto/updateWorkbookPaid.dto';
 import { unlink } from "fs/promises";
 
 @Injectable()
@@ -190,5 +191,30 @@ export class WorkbookService {
     {
       await queryRunner.release();
     }
+  }
+  //문제집 무료공개 전환
+  async updateWorkbookPaid(updateCheckedRow: UpdateBookPaidDto): Promise<{updatedCount: number}>
+  {
+    const { data } = updateCheckedRow;
+    let updatedCount = 0
+    
+    if(data.length === 0)
+    {
+      throw new NotFoundException('변경할 데이터가 없습니다.');
+    }
+
+    await Promise.all(
+      data.map(async ({ data1, data2 }) => {
+        const workbook = await this.workbookRepository.findOne({ where: { workbookId: data1, workbookName: data2 } });
+  
+        if(workbook) 
+        {
+          await this.workbookRepository.update({ workbookId: data1, workbookName: data2 }, { isPaid: !workbook.isPaid });
+          updatedCount++;
+        }
+      })
+    );
+
+    return { updatedCount }
   }
 }

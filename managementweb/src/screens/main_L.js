@@ -38,6 +38,35 @@ function LoginForm(props) {
     {
       const response = await api.post('/auth/manager_login',inputs, {withCredentials: true});
       navigate("managementPage");
+      const verifyToken = Cookies.get("access_token");
+    
+      if(!verifyToken)
+      {
+        navigate("/");
+        return;
+      }
+
+      try 
+      {
+        const decoded = jwtDecode(verifyToken);
+        if (decoded.userType === "관리자") 
+        {
+          navigate("/managementPage");
+        }
+        else if (decoded.userType === "교사") 
+        {
+          navigate("/forT");
+        }
+        else
+        {
+          navigate("/");
+        }
+      } 
+      catch (error) 
+      {
+        console.error("토큰 디코딩 오류:", error);
+        navigate("/");
+      }
     }
     catch(error)
     {
@@ -104,6 +133,18 @@ function MyApp() {
         setAlertMessage('관리자님 환영합니다.');
         setIsModalOpen(true);
         navigate("/managementPage");
+      }
+      else if (decoded.userType === "교사") 
+      {
+        setAlertMessage('선생님 환영합니다');
+        setIsModalOpen(true);
+        navigate("/forT");
+      }
+      else
+      {
+        setAlertMessage('학생은 접근할 수 없습니다.');
+        setIsModalOpen(true);
+        navigate("/");
       }
     } 
     catch (error) 

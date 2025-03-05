@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import api from '../api';
 import Table from './table';
 
-const Student = ({forceRender, handleCheckboxChange}) => {
+const Student = ({category, forceRender, handleCheckboxChange}) => {
   const [studata, setStudata] = useState([]);
   const [loading, setLoading] = useState(true);
   const columns = [
@@ -42,7 +42,7 @@ const Student = ({forceRender, handleCheckboxChange}) => {
     getStudent();
   }, [forceRender, getStudent]);
   return (
-    loading ? <p>데이터 불러오는 중...</p> : <Table columns = {columns} info = {studata} handleCheckboxChange = {handleCheckboxChange} />
+    loading ? <p>데이터 불러오는 중...</p> : <Table category={category} columns = {columns} info = {studata} handleCheckboxChange = {handleCheckboxChange} />
   )
 };
 

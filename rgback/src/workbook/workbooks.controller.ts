@@ -6,6 +6,7 @@ import { Multer } from "multer";
 import { WorkbookService } from './workbooks.service';
 import { UploadBookDto } from '../dto/uploadWorkbook.dto';
 import { DeleteCheckedDto } from '../dto/deleteChecked.dto';
+import { UpdateBookPaidDto } from 'src/dto/updateWorkbookPaid.dto';
 import { multerConfig } from './multer.config';
 
 @Controller('workbook')
@@ -27,7 +28,7 @@ export class WorkbookController {
     const workbooks = await this.workbookService.getWorkbookTotalList();
     return workbooks;
   }
-
+  //책 다운로드
   @Post('download')
   async downloadBook(@Body('storageLink') storageLink : string, @Res() res : Response)
   {
@@ -39,6 +40,7 @@ export class WorkbookController {
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(storageLink)}"`);
     res.sendFile(bookLink);
   }
+  //책 업로드
   @Post('adddata')
   @UseInterceptors(FileInterceptor("file", multerConfig))
   async uploadBook(
@@ -48,9 +50,16 @@ export class WorkbookController {
   {
     return this.workbookService.uploadWorkbookFile(data, file);
   }
+  //책 삭제
   @Delete('deletedata')
   async deleteBook(@Body() deleteCheckedRow: DeleteCheckedDto)
   {
     return this.workbookService.deleteWorkbook(deleteCheckedRow);
+  }
+  //책 변경(유료 무료)
+  @Post('changedata')
+  async updateBook(@Body() updateCheckedRow: UpdateBookPaidDto)
+  {
+    return this.workbookService.updateWorkbookPaid(updateCheckedRow);
   }
 }

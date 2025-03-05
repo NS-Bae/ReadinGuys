@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import api from '../api';
 import Table from './table';
 
-const Workbook = ({forceRender, handleCheckboxChange}) => {
+const Workbook = ({ category, forceRender, handleCheckboxChange, handleToggle }) => {
   const [bookdata, setBookdata] = useState([]);
   const [loading, setLoading] = useState(true);
   const columns = [
@@ -45,7 +45,7 @@ const Workbook = ({forceRender, handleCheckboxChange}) => {
   }, [forceRender, getWorkbook]);
 
   return (
-    loading ? <p>데이터 불러오는 중...</p> : <Table columns = {columns} info = {bookdata} handleCheckboxChange = {handleCheckboxChange} />
+    loading ? <p>데이터 불러오는 중...</p> : <Table category={category} columns = {columns} info = {bookdata} handleCheckboxChange = {handleCheckboxChange} handleToggle={handleToggle} />
   )
 };
 

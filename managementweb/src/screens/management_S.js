@@ -27,6 +27,7 @@ function MyApp()
   const [isBigModalOpen, setIsBigModalOpen] = useState(false);
   const [isMidModalOpen, setIsMidModalOpen] = useState(false);
   const [forceRender, setForceRender] = useState(0);
+  const pageId = 'manager';
 
   let link = '';
   const navigate = useNavigate();
@@ -350,7 +351,7 @@ function MyApp()
       <div className="wrap">
         <MainLogo />
         <LoginControl handleLogout={handleLogout}/>
-        <NavBar onButtonClick={onNavbarButtonClick} />
+        <NavBar pageId={pageId} onButtonClick={onNavbarButtonClick} />
         <div className='basicspace'>
           {category==='management_academy' && (
             <Academy category={category} forceRender={forceRender} handleCheckboxChange = {handleCheckboxChange} />

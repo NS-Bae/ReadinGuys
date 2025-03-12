@@ -8,14 +8,26 @@ import api from '../api';
 import MainLogo from '../components/main_logo';
 import LoginControl from '../components/loginControl';
 import NavBar from '../components/nav_Bar';
+import InfoTable from '../components/infoTable';
 import CustomModal from '../components/alert';
+import ListModal from '../components/listModal.js';
 
 function MyApp() 
 {
   const [category, setCategory] = useState('basic');
   const [alertMessage, setAlertMessage] = useState('');
   const [stateId, setStateId] = useState('');
+  const [userCount, setUserCount] = useState(0);
+  const [userInfo, setUserInfo] = useState([]);
+  const [stuInfo, setStuInfo] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const pageId = 'teacher';
+  const columns = [
+    { key: "1", label: "사용자 ID" },
+    { key: "2", label: "사용자 이름" },
+    { key: "3", label: "사용자 분류" },
+  ];
 
   const navigate = useNavigate();
 
@@ -33,6 +45,7 @@ function MyApp()
     try 
     {
       const decoded = jwtDecode(verifyToken);
+      setUserInfo(decoded.id);
 
       if (decoded.userType === "관리자") 
       {
@@ -91,9 +104,53 @@ function MyApp()
       navigate('/managementPage');
     }
   };
-
+  const handleListModalConfirm = () => {
+    console.log("확인 버튼을 클릭",category);
+    setIsListModalOpen(false);
+  };
+  const handleListModalCancel = () => {
+    console.log("취소 버튼을 클릭");
+    setIsListModalOpen(false);
+  };
   const onNavbarButtonClick = (e) => {
     setCategory(e.target.id);
+    if(e.target.id === 'academy')
+    {
+      getAcademyInfo(userInfo);
+    }
+  };
+
+  const clickDetail = () => {
+    console.log(isListModalOpen);
+    getAcademyStudentList(userInfo);
+    setIsListModalOpen(true);
+  };
+
+  async function getAcademyInfo(data)
+  {
+    if(userInfo.length === 0) return ;
+    try
+    {
+      const response = await api.post('/academy/myinfo', {userInfo});
+      setUserInfo(response.data.myAcademy);
+      setUserCount(response.data.myAcademyStudent);
+    }
+    catch(error)
+    {
+      console.error('데이터 로딩 실패', error);
+    }
+  };
+  async function getAcademyStudentList(data)
+  {
+    if(userInfo.length === 0) return ;
+    try
+    {
+      const response = await api.post('/academy/academystudentlist', {userInfo});
+    }
+    catch(error)
+    {
+      console.error('데이터 로딩 실패', error);
+    }
   };
 
   return (
@@ -101,12 +158,26 @@ function MyApp()
       <div className="wrap">
         <MainLogo />
         <LoginControl handleLogout={handleLogout} />
-        <NavBar onButtonClick={onNavbarButtonClick} />
+        <NavBar pageId={pageId} onButtonClick={onNavbarButtonClick} />
         <div className='basicspace'>
-          
+          {category==='academy' && (
+            <InfoTable category={category} info = {userInfo} userCount = {userCount} />
+          )}
+          {category==='check_stdent_state' && (
+            <InfoTable category={category}  />
+          )}
         </div>
         <div className='btn_section'>
-        
+        {category !== 'basic' && (
+          <>
+          {category === "academy" && (
+            <button id='detail' className='normal_btn' onClick={clickDetail} >소속 학생보기</button>
+          )}
+          {category === "check_stdent_state" && (
+            <button id='changePW' className='normal_btn' ></button>
+          )}
+          </>
+        )}
         </div>
       </div>
       <CustomModal
@@ -114,6 +185,14 @@ function MyApp()
         message={alertMessage}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
+      />
+      <ListModal
+        isOpen={isListModalOpen}
+        onConfirm={handleListModalConfirm}
+        onCancel={handleListModalCancel}
+        columns={columns}
+        info={stuInfo}
+        category={category}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { Cron } from "@nestjs/schedule";
 import { endOfMonth } from 'date-fns';
 
 import { Academy } from "./academy.entity";
-import { User } from "../users/users.entity";
+import { User, UserType } from "../users/users.entity";
 import { NotFoundError } from "rxjs";
 import { DeleteCheckedDto } from '../dto/deleteChecked.dto';
 import { UpdateAcademyDto } from "../dto/update-academy.dto";
@@ -221,6 +221,28 @@ export class AcademyService
     {
       await queryRunner.release();
     }
+  }
+  //소속학원생 구하기
+  async getAcademyStudent(userInfo: string)
+  {
+    const teacher = await this.dataSource
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .select(["user.academy"])
+      .where("user.id = :id", { id: userInfo })
+      .getRawOne();
+    console.log('a', teacher.AcademyID, 'a', userInfo);
+    const myAcademyId = teacher.AcademyID;
+
+    const myAcademy = await this.academyRepository.findOne({where : {academyId : myAcademyId}});
+    const myAcademyStudent = await this.dataSource
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .where('user.academy = :academyId', { academyId: myAcademyId })
+      .andWhere('user.userType = :userType', { userType: UserType.학생 })
+      .getCount()
+    console.log('b', myAcademyId, 'b', myAcademy, 'b', myAcademyStudent);
+    return { myAcademy, myAcademyStudent };
   }
 
   //test

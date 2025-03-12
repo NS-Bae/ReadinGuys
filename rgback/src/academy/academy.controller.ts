@@ -35,6 +35,12 @@ export class AcademyController{
   {
     return this.academyService.registNewAcademy(addNewAcademyDto);
   }
+
+  @Post('myinfo')
+  async getAcademyinfo(@Body("userInfo") userInfo: string)
+  {
+    return this.academyService.getAcademyStudent(userInfo);
+  }
   //test
   /* @Post('test-expired')
   async testExpiredAcademies()

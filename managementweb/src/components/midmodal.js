@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import styles from './alertStyle.ts';
-import '../App.css';
+import { NormalButton } from './normalButtonStyle.ts';
 import UpdateTable from './updateTable';
 import api from '../api';
 
@@ -93,16 +93,12 @@ const ChangeModal = ({ isOpen, onConfirm, onCancel, checkedRow, category }) => {
           )}
         </div>
         <div style={styles.modalButtonPlace}>
-          <button 
-            onClick={handleConfirm}
-            className='normal_btn'>
+          <NormalButton onClick={handleConfirm}>
               확인
-          </button>
-          <button 
-            onClick={onCancel}
-            className='normal_btn'>
+          </NormalButton>
+          <NormalButton onClick={onCancel}>
               취소
-          </button>
+          </NormalButton>
         </div>
       </div>
     </div>

@@ -19,6 +19,7 @@ function MyApp()
   const [stateId, setStateId] = useState('');
   const [userCount, setUserCount] = useState(0);
   const [userInfo, setUserInfo] = useState([]);
+  const [academyInfo, setAcademyInfo] = useState([]);
   const [stuInfo, setStuInfo] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isListModalOpen, setIsListModalOpen] = useState(false);
@@ -132,7 +133,7 @@ function MyApp()
     try
     {
       const response = await api.post('/academy/myinfo', {userInfo});
-      setUserInfo(response.data.myAcademy);
+      setAcademyInfo(response.data.myAcademy);
       setUserCount(response.data.myAcademyStudent);
     }
     catch(error)
@@ -146,6 +147,7 @@ function MyApp()
     try
     {
       const response = await api.post('/academy/academystudentlist', {userInfo});
+      setStuInfo(response.data.myAcademyStudent);
     }
     catch(error)
     {
@@ -161,7 +163,7 @@ function MyApp()
         <NavBar pageId={pageId} onButtonClick={onNavbarButtonClick} />
         <div className='basicspace'>
           {category==='academy' && (
-            <InfoTable category={category} info = {userInfo} userCount = {userCount} />
+            <InfoTable category={category} info = {academyInfo} userCount = {userCount} />
           )}
           {category==='check_stdent_state' && (
             <InfoTable category={category}  />

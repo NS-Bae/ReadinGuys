@@ -1,6 +1,5 @@
 import React from 'react';
-
-import Table from './table';
+import ListTable from './listTable.js';
 
 import { NormalButton } from './normalButtonStyle.ts';
 import styles from './alertStyle.ts';
@@ -14,7 +13,7 @@ const ListModal = ({ isOpen, onConfirm, onCancel, columns, info, category }) => 
       <div style={styles.bigmodalContent}>
         <div style={styles.contentplace}>
           <h2>소속 학생/직원</h2>
-          <Table category={category} columns = {columns} info={info}/>
+          <ListTable category={category} columns = {columns} info={info}/>
         </div>
         <div style={styles.modalButtonPlace}>
           <NormalButton onClick={onConfirm}>

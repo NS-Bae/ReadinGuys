@@ -11,7 +11,7 @@ const Table = ({category, columns, info, handleCheckboxChange, handleToggle}) =>
     <table style = {styles.whole_table}>
       <thead style={styles.head_table}>
         <tr>
-          {category !== 'academy' && <td>체크</td>}
+          <td>체크</td>
           {columns.map((col) => (
             <td key = {col.key}>{col.label}</td>
           ))}
@@ -31,14 +31,10 @@ const Table = ({category, columns, info, handleCheckboxChange, handleToggle}) =>
             <td style={styles.table_data}>{info[i].i1}</td>
             <td style={styles.table_data}>{info[i].i2}</td>
             <td style={styles.table_data}>{info[i].i3}</td>
-            {category !== 'academy' && 
-            <>
-              <td style={styles.table_data}>{info[i].i4}</td>
-              <td style={styles.table_data}>
-                {category === 'management_workbook' ? <ToggleButton item={info[i]} handleToggle={handleToggle}/> : info[i].i5 }
-              </td>
-            </>
-            }
+            <td style={styles.table_data}>{info[i].i4}</td>
+            <td style={styles.table_data}>
+              {category === 'management_workbook' ? <ToggleButton item={info[i]} handleToggle={handleToggle}/> : info[i].i5 }
+            </td>
           </tr>
         ))}
       </tbody>

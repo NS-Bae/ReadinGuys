@@ -222,7 +222,7 @@ export class AcademyService
       await queryRunner.release();
     }
   }
-  //소속학원생 구하기
+  //소속학원생숫자 구하기
   async getAcademyStudent(userInfo: string)
   {
     const teacher = await this.dataSource
@@ -231,7 +231,6 @@ export class AcademyService
       .select(["user.academy"])
       .where("user.id = :id", { id: userInfo })
       .getRawOne();
-    console.log('a', teacher.AcademyID, 'a', userInfo);
     const myAcademyId = teacher.AcademyID;
 
     const myAcademy = await this.academyRepository.findOne({where : {academyId : myAcademyId}});
@@ -244,7 +243,26 @@ export class AcademyService
     console.log('b', myAcademyId, 'b', myAcademy, 'b', myAcademyStudent);
     return { myAcademy, myAcademyStudent };
   }
+  //소속학원생리스트 구하기
+  async getAcademyStudentList(userInfo: string)
+  {
+    const teacher = await this.dataSource
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .select(["user.academy"])
+      .where("user.id = :id", { id: userInfo })
+      .getRawOne();
+    const myAcademyId = teacher.AcademyID;
 
+    const myAcademy = await this.academyRepository.findOne({where : {academyId : myAcademyId}});
+    const myAcademyStudent = await this.dataSource
+      .getRepository(User)
+      .createQueryBuilder("user")
+      .where('user.academy = :academyId', { academyId: myAcademyId })
+      .getMany()
+    console.log('b', myAcademyId, 'b', myAcademy, 'b', myAcademyStudent);
+    return { myAcademyStudent };
+  }
   //test
   /* async testCheckExpieredAcademies()
   {

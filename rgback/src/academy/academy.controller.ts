@@ -37,9 +37,15 @@ export class AcademyController{
   }
 
   @Post('myinfo')
-  async getAcademyinfo(@Body("userInfo") userInfo: string)
+  async getAcademyInfo(@Body("userInfo") userInfo: string)
   {
     return this.academyService.getAcademyStudent(userInfo);
+  }
+
+  @Post('academystudentlist')
+  async getAcademyStudentInfo(@Body("userInfo") userInfo: string)
+  {
+    return this.academyService.getAcademyStudentList(userInfo);
   }
   //test
   /* @Post('test-expired')

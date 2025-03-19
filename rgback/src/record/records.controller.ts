@@ -16,7 +16,6 @@ export class RecordsController {
   @Post('onestudent')
   async getOneAcademyStudent(@Body() data: {data: string, academyId: string } )
   {
-    console.log(data);
     return this.recordsService.getOneAcademyStudentRecord(data);
   }
 }

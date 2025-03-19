@@ -3,9 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, DataSource } from 'typeorm';
 
 import { Records } from './records.entity';
-import { User } from '../users/users.entity';
-import { Academy } from '../academy/academy.entity';
-import { Workbook } from '../workbook/workbooks.entity';
 
 @Injectable()
 export class RecordsService {

@@ -5,7 +5,7 @@ import { NormalButton } from './normalButtonStyle.ts';
 import styles from './alertStyle.ts';
 
 const ListModal = ({ isOpen, onConfirm, onCancel, columns, info, category }) => {
-
+  console.log(info);
   if(!isOpen) return null;
 
   return (

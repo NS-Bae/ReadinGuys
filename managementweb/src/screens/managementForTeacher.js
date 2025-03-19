@@ -10,7 +10,8 @@ import LoginControl from '../components/loginControl';
 import NavBar from '../components/nav_Bar';
 import InfoTable from '../components/infoTable';
 import CustomModal from '../components/alert';
-import ListModal from '../components/listModal.js';
+import ListModal from '../components/listModal';
+import ExamRecord from '../components/examRecord';
 
 function MyApp() 
 {
@@ -21,6 +22,8 @@ function MyApp()
   const [userInfo, setUserInfo] = useState([]);
   const [academyInfo, setAcademyInfo] = useState([]);
   const [stuInfo, setStuInfo] = useState([]);
+  const [stuList, setStuList] = useState([]);
+  const [recordInfo, setRecordInfo] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const pageId = 'teacher';
@@ -66,6 +69,12 @@ function MyApp()
       console.error("토큰 디코딩 오류:", error);
     }
   }, [navigate]);
+  useEffect(() => {
+    if (category === 'check_stdent_state') {
+      getAcademyInfo(userInfo);
+      getAcademyStudentList(userInfo);
+    }
+  }, [category]);
 
   const handleLogout = async(e) => {
     try
@@ -147,11 +156,52 @@ function MyApp()
     try
     {
       const response = await api.post('/academy/academystudentlist', {userInfo});
-      setStuInfo(response.data.myAcademyStudent);
+      if(category === 'check_stdent_state')
+      {
+        const refineData = response.data.myAcademyStudent.map(({id, userName}) => ({id, userName}));
+        console.log(refineData);
+        setStuList(refineData);
+      }
+      else
+      {
+        setStuInfo(response.data.myAcademyStudent);
+      }
     }
     catch(error)
     {
       console.error('데이터 로딩 실패', error);
+    }
+  };
+  async function getExamRecord(data)
+  {
+    const academyId = academyInfo.academyId;
+    console.log(data);
+    if(data !== '')
+    {
+      if(data === 'all')
+      {
+        try
+        {
+          const response = await api.post('/records/allstudent', { academyId });
+          setRecordInfo(response.data);
+        }
+        catch(error)
+        {
+          console.error('데이터 로딩 실패', error);
+        }
+      }
+      else
+      {
+        try
+        {
+          const response = await api.post('/records/onestudent', { data, academyId });
+          setRecordInfo(response.data);
+        }
+        catch(error)
+        {
+          console.error('데이터 로딩 실패', error);
+        }
+      }
     }
   };
 
@@ -163,10 +213,10 @@ function MyApp()
         <NavBar pageId={pageId} onButtonClick={onNavbarButtonClick} />
         <div className='basicspace'>
           {category==='academy' && (
-            <InfoTable category={category} info = {academyInfo} userCount = {userCount} />
+            <InfoTable category={category} info={academyInfo} userCount={userCount} />
           )}
           {category==='check_stdent_state' && (
-            <InfoTable category={category}  />
+            <ExamRecord category={category} stuList={stuList} info={recordInfo} getExamRecord={getExamRecord} />
           )}
         </div>
         <div className='btn_section'>

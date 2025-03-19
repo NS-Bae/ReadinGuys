@@ -240,7 +240,7 @@ export class AcademyService
       .where('user.academy = :academyId', { academyId: myAcademyId })
       .andWhere('user.userType = :userType', { userType: UserType.학생 })
       .getCount()
-    console.log('b', myAcademyId, 'b', myAcademy, 'b', myAcademyStudent);
+      
     return { myAcademy, myAcademyStudent };
   }
   //소속학원생리스트 구하기
@@ -260,7 +260,7 @@ export class AcademyService
       .createQueryBuilder("user")
       .where('user.academy = :academyId', { academyId: myAcademyId })
       .getMany()
-    console.log('b', myAcademyId, 'b', myAcademy, 'b', myAcademyStudent);
+      
     return { myAcademyStudent };
   }
   //test

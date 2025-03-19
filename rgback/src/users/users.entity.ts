@@ -6,9 +6,11 @@ import {
   JoinColumn,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Academy } from '../academy/academy.entity'; // Academy 엔티티를 만든 경우
+import { Academy } from '../academy/academy.entity';
+import { Records } from '../record/records.entity';
 
 export enum UserType {
   관리자 = '관리자',
@@ -46,4 +48,7 @@ export class User {
 
   @Column({ type: 'boolean', nullable: false })
   ok: boolean;
+
+  @OneToMany(() => Records, (examRecord) => examRecord.user)
+  examRecords: Records[];
 }

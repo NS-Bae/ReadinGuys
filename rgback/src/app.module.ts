@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
+
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { WorkbooksModule } from './workbook/workbooks.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AcademyModule } from './academy/academy.module';
-import { ScheduleModule } from '@nestjs/schedule';
+import { RecordsModule } from './record/records.module';
 
 @Module({
   imports: [
@@ -16,6 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     WorkbooksModule,
     FirebaseModule,
     AcademyModule,
+    RecordsModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,

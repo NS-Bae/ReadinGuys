@@ -1,7 +1,6 @@
 import styles from './infoTableStyle.ts';
 
 const InfoTable = ({ category, info, userCount }) => {
-  console.log(info, category, userCount);
   return (
     <table style={styles.whole_table}>
       <tbody style={styles.body_table}>

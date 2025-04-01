@@ -5,12 +5,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import messaging from '@react-native-firebase/messaging';
 import { useEffect } from 'react';
 import { PermissionsAndroid, Alert } from 'react-native';
-import axios from 'axios';
 import notifee, { AndroidImportance, AndroidVisibility, EventType } from '@notifee/react-native';
 
 import HomeScreen from './screens/homeScreen';
 import LoginScreen from './screens/loginScreen';
 import MainScreen from './screens/mainScreen2';
+import api from './api';
 
 import { StackParamList } from './types';
 
@@ -124,7 +124,7 @@ const App: React.FC = () => {
   const sendTokenToServer = async (token: string) => {
     try
     {
-      await axios.post('http://10.0.2.2:3000/fb/tk', {
+      await api.post('/fb/tk', {
         token : token,
       });
       console.log('Token sent to server:');

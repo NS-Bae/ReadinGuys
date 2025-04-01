@@ -35,9 +35,8 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: false })
   userName: string;
 
-  @ManyToOne(() => Academy, (academy) => academy.academyId, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'AcademyID' })
-  academy: Academy;
+  @Column({ type: 'varchar', length: 255 })
+  AcademyID: string;
 
   @Column({
     type: 'enum',
@@ -48,7 +47,12 @@ export class User {
 
   @Column({ type: 'boolean', nullable: false })
   ok: boolean;
-
+  
+  //관계설정
   @OneToMany(() => Records, (examRecord) => examRecord.user)
   examRecords: Records[];
+
+  @ManyToOne(() => Academy, (academy) => academy.users , { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'AcademyID' })
+  academy: Academy;
 }

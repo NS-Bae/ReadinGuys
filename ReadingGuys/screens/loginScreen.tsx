@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import React, { useState } from 'react';
 import { SafeAreaView, ScrollView, View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,7 @@ import Styles from '../mainStyle.tsx';
 import Mt from '../Components/text.tsx';
 import Ti from '../Components/textinput.tsx';
 import Ca from '../Components/alert.tsx';
+import api from '../api.tsx';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Login'>;
 
@@ -42,8 +43,8 @@ function LoginScreen({ navigation } : LoginScreenProps): React.JSX.Element {
     if(inputs.ip1.trim() !== '' && inputs.ip2.trim() !== '')
     {
       try
-      {//auth.controller.ts로 요청 보냄
-        const response = await axios.post('http://10.0.2.2:3000/auth/login',
+      {
+        const response = await api.post('/auth/login',
           inputs,
         );
         if(response.status === 201 )
@@ -56,8 +57,6 @@ function LoginScreen({ navigation } : LoginScreenProps): React.JSX.Element {
 
           await AsyncStorage.setItem('userToken', token);
           await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-          console.log(JSON.stringify(userInfo));
-          console.log(userInfo.academyId);
         }
         else
         {

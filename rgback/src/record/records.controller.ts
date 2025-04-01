@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from "@nestjs/common";
 
 import { RecordsService } from './records.service';
-import { Academy } from "src/academy/academy.entity";
+import { SearchDetailRecordDto } from '../dto/searchOneWorkbookOneStudent.dto';
 
 @Controller('records')
 export class RecordsController {
@@ -17,5 +17,11 @@ export class RecordsController {
   async getOneAcademyStudent(@Body() data: {data: string, academyId: string } )
   {
     return this.recordsService.getOneAcademyStudentRecord(data);
+  }
+
+  @Post('oneonerecord')
+  async getOneWorkbookExamRecord(@Body() searchDetailRecordDto: SearchDetailRecordDto)
+  {
+    return this.recordsService.getOneStudentOneWorkbookRecord(searchDetailRecordDto);
   }
 }

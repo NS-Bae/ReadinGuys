@@ -19,7 +19,7 @@ export class AuthService {
   async validateUser(loginDto: LoginDto): Promise<any>
   {
     const { ip1: ip1, ip2: ip2 } = loginDto;
-    const user = await this.usersService.findOne(ip1);//유저찾기
+    const user = await this.usersService.findOne(ip1);
     
     if(!user)
     {
@@ -45,8 +45,13 @@ export class AuthService {
   {
     const user = await this.validateUser(loginDto);
 
-    const payload = { id: user.id, userName: user.userName ,userType: user.userType, academyId: user.academyId, isItOk: user.ok };
-    
+    const payload = { 
+      id: user.id,
+      userName: user.userName,
+      userType: user.userType,
+      AcademyID: user.AcademyID,
+      isItOk: user.ok };
+
     const accessToken = this.jwtService.sign(payload);
 
     return { accessToken, userInfo: user };

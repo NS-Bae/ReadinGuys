@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, DataSource } from 'typeorm';
 
 import { Records } from './records.entity';
+import { SearchDetailRecordDto } from '../dto/searchOneWorkbookOneStudent.dto';
 
 @Injectable()
 export class RecordsService {
@@ -79,6 +80,43 @@ export class RecordsService {
       }));
     } 
     catch (error) 
+    {
+      console.error('쿼리 실행 중 오류 발생:', error);
+      throw new InternalServerErrorException('데이터를 불러오는 중 오류가 발생했습니다.');
+    }
+  }
+
+  async getOneStudentOneWorkbookRecord(searchDetailRecordDto: SearchDetailRecordDto)
+  {
+    const { refineData } = searchDetailRecordDto;
+
+    try
+    {
+      const records = await this.recordsRepository
+        .createQueryBuilder('records')
+        .leftJoinAndSelect('records.academy', 'academy')
+        .leftJoinAndSelect('records.workbook', 'workbook')
+        .leftJoinAndSelect('records.user', 'user')
+        .select([
+          "workbook.workbookName as WorkbookName",
+          "records.ExamDate as ExamDate",
+          "records.ProgressRate as ProgressRate",
+          "records.RecordLink as RecordLink",
+        ])
+        .where('workbook.workbookId = :workbookId', { workbookId: refineData.workbookId })
+        .andWhere('academy.academyId = :academyId', { academyId: refineData.academyId })
+        .andWhere('user.id = :id', {id: refineData.userId})
+        .andWhere('user.userName = :userName', {userName: refineData.userName})
+        .getRawMany();
+      
+      return records.map(record => ({
+        ...record,
+        examDate: record.ExamDate.toLocaleDateString("ko-KR", {
+          hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
+        }),
+      }));
+    }
+    catch(error)
     {
       console.error('쿼리 실행 중 오류 발생:', error);
       throw new InternalServerErrorException('데이터를 불러오는 중 오류가 발생했습니다.');

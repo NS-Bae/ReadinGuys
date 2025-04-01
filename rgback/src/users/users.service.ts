@@ -182,8 +182,22 @@ export class UsersService {
 
   async findOne(id: string): Promise<User> 
   {
-    const user = await this.usersRepository.findOne({ where : { id } });
+    const user = await this.usersRepository.findOne({ where : { id } })
     return user;
+  }
+
+  async findAcademy(id: string)
+  {
+    const userAcademyId = await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.academy', 'academy')
+      .select([
+        "academy.academyId as academyId",
+      ])
+      .where('user.id = :id', { id: id })
+      .getRawOne();
+
+    return userAcademyId;
   }
 
   async update(id: string, userData: Partial<User>): Promise<User>

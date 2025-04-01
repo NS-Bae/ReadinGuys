@@ -3,11 +3,11 @@ import { SafeAreaView, ScrollView, View, useWindowDimensions } from 'react-nativ
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackParamList } from '../types.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {jwtDecode} from 'jwt-decode';
 
 import Bb from '../Components/btn.tsx';
 import Styles from '../mainStyle.tsx';
 import Mt from '../Components/text.tsx';
-import {jwtDecode} from 'jwt-decode';
 
 type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Home'>;
 

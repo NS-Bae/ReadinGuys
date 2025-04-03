@@ -105,13 +105,15 @@ const styles = (width: number) => StyleSheet.create({
   },
 
   tfContainer:{
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     flexBasis: 'auto',
-    alignContent: 'flex-start',
+    alignItems: 'flex-start',
     width: '100%',
     height: 'auto',
-    padding: 10,
-    backgroundColor: 'rgb(255, 166, 0)',
+    padding: 0,
+    paddingBottom: 10,
+    margin: 0,
+    backgroundColor: '#98c9f4',
   },
   normal: {
     fontSize: width > 600 ? 40 : 30,

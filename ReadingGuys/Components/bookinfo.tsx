@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 
 import Styles from '../mainStyle.tsx';
-import api from '../api.tsx';
 import Mt from './text.tsx';
 import Accordion from './accordionList.tsx';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AxiosError } from 'axios';
 
 interface Book {
   workbookId: string;
@@ -14,27 +11,27 @@ interface Book {
   Difficulty: string;
   storageLink: string;
 }
-
+interface Records {
+  ExamDate: string;
+  ProgressRate: string;
+  RecordLink: string;
+  WorkbookName: string;
+  examDate: string;
+}
 interface BookInfoProps {
   books: Book;
+  recordList: Records[];
+  recordCount: number;
+  movePage: (value: string) => void;
+  recordDetail: (recordLink: string) => void;
 }
 
-const BookInfo: React.FC<BookInfoProps> = ({ books }) => {
+const BookInfo: React.FC<BookInfoProps> = ({ books, recordList, recordCount, movePage, recordDetail }) => {
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
   const basicInfo = '시험 정보';
 
   const [collapsed, setCollapsed] = useState(true);
-  const [refineData, setRefineData] = useState<{ userId: string; userName: string; academyId: string; workbookId: string } | null>(null);
-  const [recordList, setRecordList] = useState<any>(null);
-  const [recordCount, setRecordCount] = useState<number>(0);
-
-  useEffect(() => {
-    setBasicInfo();
-  }, [books]);
-  useEffect(() => {
-    getWorkbookExamRecord();
-  }, [refineData]);
 
   //books props가 없는(null) 경우 return null
   if(books === null)
@@ -45,46 +42,10 @@ const BookInfo: React.FC<BookInfoProps> = ({ books }) => {
   const handleAccordion = async () => {
     setCollapsed(!collapsed);
   };
-  //백엔드에 전송될 정보 정제
-  async function setBasicInfo()
-  {
-    const myinfo = await AsyncStorage.getItem('userInfo');
-    if(myinfo === null)
-    {
-      return null;
-    }
-    const parsedMyInfo = JSON.parse(myinfo);
-    const selectedData = {
-      userId: parsedMyInfo.id,
-      userName: parsedMyInfo.userName,
-      academyId: parsedMyInfo.AcademyID,
-      workbookId: books.workbookId,
-    };
-    setRefineData(selectedData);
-  }
-  //내 시험기록중 특정 문제집을 가져오기
-  async function getWorkbookExamRecord()
-  {
-    try
-    {
-      const response = await api.post('/records/oneonerecord',{refineData});
-      if(response)
-      {
-        console.log(response.data, '성공');
-        setRecordList(response.data);
-        setRecordCount(response.data.length);
-      }
-      else
-      {
-        console.log(response, '실패');
-      }
-    }
-    catch(error)
-    {
-      const axiosError = error as AxiosError;
-      console.log(axiosError);
-    }
-  }
+  const handleGoExam = () => {
+    const value = 'exam';
+    movePage(value);
+  };
 
   return (
     <ScrollView
@@ -101,7 +62,20 @@ const BookInfo: React.FC<BookInfoProps> = ({ books }) => {
           <Text style={exclusiveStyles.normal}>책 난이도 : {books.Difficulty}</Text>
           <Text style={exclusiveStyles.normal}>응시 횟수 : {recordCount}</Text>
         </View>
-        <Accordion basicInfo={basicInfo} onPress={handleAccordion} isCollapsed={collapsed} info={recordList} />
+        <Accordion
+          basicInfo={basicInfo}
+          onPress={handleAccordion}
+          isCollapsed={collapsed}
+          info={recordList}
+          recordDetail={recordDetail}
+          />
+        <View style={exclusiveStyles.btncontainer}>
+          <TouchableOpacity onPress={handleGoExam} style={exclusiveStyles.gotoexambutton}>
+            <Text style={exclusiveStyles.infotext}>
+              시험 보러 가기
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -117,7 +91,6 @@ const exclusiveStyles = StyleSheet.create({
     padding: 20,
     alignItems: 'flex-start',
     width: '100%',
-
   },
   normal: {
     fontSize: 27,
@@ -127,6 +100,26 @@ const exclusiveStyles = StyleSheet.create({
     color: 'black',
     margin: 0,
     padding: 0,
+  },
+  infotext: {
+    fontSize: 25,
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  btncontainer: {
+    flex: 1,
+    flexDirection: 'column',
+    width: '100%',
+    paddingRight: 10,
+    paddingLeft: 10,
+    paddingBottom: 30,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  gotoexambutton: {
+    width: '80%',
+    alignItems: 'center',
+    fontSize: 15,
   },
 });
 

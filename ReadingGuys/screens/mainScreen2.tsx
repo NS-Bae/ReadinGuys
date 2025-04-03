@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { StackParamList } from '../types.tsx';
 import { AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -9,15 +11,31 @@ import BookScroll from '../Components/bookScroll.tsx';
 import BookInfo from '../Components/bookinfo.tsx';
 import api from '../api.tsx';
 
-const Ms = () => {
+type MainScreenNavigationProp = NativeStackNavigationProp<StackParamList, 'Main'>;
+
+interface MainScreenProps {
+  navigation: MainScreenNavigationProp;
+}
+interface Records {
+  ExamDate: string;
+  ProgressRate: string;
+  RecordLink: string;
+  WorkbookName: string;
+  examDate: string;
+}
+
+function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [bookList, setBookList] = useState<any>(null);
   const [bookInfo, setBookInfo] = useState<any>(null);
+  const [recordList, setRecordList] = useState<any>(null);
+  const [recordCount, setRecordCount] = useState<number>(0);
 
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
 
   const getBookList = useCallback(async () => {
+    if (!userInfo) { return null; }
     try
     {
       const response = await api.get('/workbook/list',{
@@ -25,7 +43,6 @@ const Ms = () => {
       });
       if(response)
       {
-        console.log(response.data, '성공');
         setBookList(response.data);
       }
       else
@@ -45,31 +62,51 @@ const Ms = () => {
       const storedUserInfo = await AsyncStorage.getItem('userInfo');
 
       if (storedUserInfo)
-        {
+      {
         const parsedUserInfo = JSON.parse(storedUserInfo);
 
         if (parsedUserInfo && parsedUserInfo.AcademyID)
         {
           setUserInfo(parsedUserInfo);
-          console.log('a parsedUserInfo',parsedUserInfo); // 데이터 구조 확인
         }
         else
         {
           console.warn('academyId가 없습니다.');
         }
-      } else {
+      }
+      else
+      {
         console.warn('userInfo가 AsyncStorage에 없습니다.');
       }
-    } catch (error) {
+    }
+    catch (error)
+    {
       console.error('사용자 정보를 가져오는데 실패했습니다:', error);
     }
   };
 
-  const selectCheck = (bookinfo: any) => {
-    console.log('q', bookinfo);
+  const selectCheck = (bookinfo: string, RecordList: Records[], RecordCount: number) => {
     setBookInfo(bookinfo);
+    setRecordList(RecordList);
+    setRecordCount(RecordCount);
   };
-
+  //화면이동
+  const movePage = (value: string) => {
+    if(value === 'record')
+    {
+      console.log('111111111111', value);
+      navigation.navigate('Record', { RecordList: recordList });
+    }
+    else if(value === 'exam')
+    {
+      console.log('222222222222222222222', value);
+      navigation.navigate('Exam');
+    }
+  };
+  //시험기록 상세보기 모달창(미완)
+  const recordDetail = (recordLink: string) => {
+    console.log(recordLink);
+  };
   //사용자정보 가져오기
   useEffect(() => {
     fetchUserInfo();
@@ -86,21 +123,31 @@ const Ms = () => {
             <BookScroll
               books = {bookList}
               onSelectCheckBookButton = {selectCheck}
+              userInfo = {userInfo}
+              movePage={movePage}
             />
-            <BookInfo books = {bookInfo}/>
+            <BookInfo
+              books = {bookInfo}
+              recordList = {recordList}
+              recordCount = {recordCount}
+              movePage={movePage}
+              recordDetail={recordDetail}
+            />
           </View>
         ) : ( //전체화면
           <View style={styles.basic}>
             <BookScroll
               books = {bookList}
               onSelectCheckBookButton = {selectCheck}
+              userInfo = {userInfo}
+              movePage = {movePage}
             />
           </View>
         )}
       </View>
     </GestureHandlerRootView>
   );
-};
+}
 
 
 export default Ms;

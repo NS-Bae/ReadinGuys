@@ -10,6 +10,8 @@ import notifee, { AndroidImportance, AndroidVisibility, EventType } from '@notif
 import HomeScreen from './screens/homeScreen';
 import LoginScreen from './screens/loginScreen';
 import MainScreen from './screens/mainScreen2';
+import CheckRecordScreen from './screens/fullScreen_CheckRecord';
+import ExamScreen from './screens/examScreen';
 import api from './api';
 
 import { StackParamList } from './types';
@@ -141,6 +143,8 @@ const App: React.FC = () => {
         <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}} />
         <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}} />
         <Stack.Screen name="Main" component={MainScreen} initialParams={{ inputs: { ip1: '', ip2: '' } }} options={{headerShown: false}} />
+        <Stack.Screen name="Record" component={CheckRecordScreen} options={{headerShown: false}} />
+        <Stack.Screen name="Exam" component={ExamScreen} options={{headerShown: false}} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -20,18 +20,17 @@ interface ExpandableComponentProps
   onPress: () => void;
   isCollapsed: boolean;
   info: ExamRecord[];
+  recordDetail: (recordLink: string) => void;
 }
 
-const ExpandableComponent: React.FC<ExpandableComponentProps> = ({ basicInfo, onPress, isCollapsed, info }) => {
+const ExpandableComponent: React.FC<ExpandableComponentProps> = ({ basicInfo, onPress, isCollapsed, info, recordDetail }) => {
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
 
-  if(info === null)
+  if(info === null || undefined)
   {
     return null;
   }
-
-  console.log(info, 'zsdtcfvghblkm');
 
   return (
     <View style={exclusiveStyles.basic}>
@@ -39,7 +38,7 @@ const ExpandableComponent: React.FC<ExpandableComponentProps> = ({ basicInfo, on
         <Mt title={basicInfo} titleStyle={styles.normal}/>
         <Text style={styles.small}>{isCollapsed ? '펼치기 ▼' : '접기 ▲'}</Text>
       </TouchableOpacity>
-      <Collapsible collapsed={isCollapsed}>
+      <Collapsible style={exclusiveStyles.basic} collapsed={isCollapsed}>
       {info.length > 0 ? (
         info.map((record, index) => (
           <RecordItem
@@ -47,10 +46,11 @@ const ExpandableComponent: React.FC<ExpandableComponentProps> = ({ basicInfo, on
             examDate={record.examDate}
             progressRate={record.ProgressRate}
             recordLink={record.RecordLink}
+            recordDetail={recordDetail}
           />
         ))
       ) : (
-        <Text>데이터가 없습니다.</Text>
+        <Text style={exclusiveStyles.infotext}>데이터가 없습니다.</Text>
       )}
       </Collapsible>
     </View>
@@ -87,6 +87,11 @@ const exclusiveStyles = StyleSheet.create({
     color: 'black',
     margin: 0,
     padding: 0,
+  },
+  infotext: {
+    fontSize: 15,
+    color: 'black',
+    paddingTop: 5,
   },
 });
 

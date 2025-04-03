@@ -9,13 +9,24 @@ interface Book {
   workbookId: string;
   workbookName: string;
 }
+interface Records {
+  ExamDate: string;
+  ProgressRate: string;
+  RecordLink: string;
+  WorkbookName: string;
+  examDate: string;
+}
 interface CustomBottomSheetProps {
   isVisible: boolean;
   onClose: () => void;
   sK: Book | null;
+  recordList: Records[];
+  recordCount: number;
+  latestPoint: string;
+  movePage: (value: string) => void;
 }
 
-const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({ isVisible, onClose, sK }) => {
+const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({ isVisible, onClose, sK, recordList, recordCount, latestPoint, movePage }) => {
   const { width } = useWindowDimensions(); // 화면 크기를 동적으로 가져옴
   const styles = Styles(width);
 
@@ -23,11 +34,22 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({ isVisible, onClos
   {
     return null;
   }
+  const handleGoExam = () => {
+    const value = 'exam';
+    movePage(value);
+  };
+  const handleRecord = () => {
+    console.log('record');
+    const value = 'record';
+    movePage(value);
+  };
+
+
   return (
     <BottomSheet
       index={isVisible ? 0 : -1}
       onClose={onClose}
-      snapPoints={['20%', '50%', '90%']}
+      snapPoints={['25%', '50%', '90%']}
     >
       <TouchableOpacity style={exclusiveStyles.closeButton} onPress={onClose}>
         <Text>닫기</Text>
@@ -35,14 +57,14 @@ const CustomBottomSheet: React.FC<CustomBottomSheetProps> = ({ isVisible, onClos
       <View style={exclusiveStyles.container}>
         <Text style={exclusiveStyles.text}>책 이름 : {sK.workbookName}</Text>
         <Text style={exclusiveStyles.text}>책 난이도 : {sK.Difficulty}</Text>
-        <Text style={exclusiveStyles.text}>최고 점수 : </Text>
-        <Text style={exclusiveStyles.text}>응시 횟수 : </Text>
+        <Text style={exclusiveStyles.text}>가장 최근 점수 : {latestPoint}점</Text>
+        <Text style={exclusiveStyles.text}>응시 횟수 : {recordCount}</Text>
       </View>
       <View style={styles.manyBtnContainer}>
-        <TouchableOpacity style={exclusiveStyles.exanButton} >
+        <TouchableOpacity style={exclusiveStyles.exanButton} onPress={handleGoExam}>
           <Text style={exclusiveStyles.examButtonText}>시험 보러 가기</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={exclusiveStyles.exanButton} >
+        <TouchableOpacity style={exclusiveStyles.exanButton} onPress={handleRecord} disabled={recordList.length === 0} >
           <Text style={exclusiveStyles.examButtonText}>지난 시험 보기</Text>
         </TouchableOpacity>
       </View>

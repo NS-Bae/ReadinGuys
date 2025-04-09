@@ -244,9 +244,6 @@ const BookScroll: React.FC<BookScrollProps> = ({ books, onSelectCheckBookButton,
   useEffect(() => {
     checkFileStat();
   }, []);
-  useEffect(() => {
-    console.log('책 목록 갱신됨:', existBookList);
-  }, [existBookList]);
 
   return (
     <>

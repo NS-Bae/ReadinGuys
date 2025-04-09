@@ -1,42 +1,69 @@
-import React from 'react';
-import { ScrollView, View, useWindowDimensions } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, useWindowDimensions } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackParamList } from '../types.tsx';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { unzip } from 'react-native-zip-archive';
+import RNFS, { DocumentDirectoryPath } from 'react-native-fs';
 
 import Styles from '../mainStyle.tsx';
-import Mt from '../Components/text.tsx';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import ExamSplitScreen from '../Components/examSplitScreen.tsx';
+import ExamFullScreen from '../Components/examFullScreen.tsx';
 
 type ExamScreenNavigationProps = NativeStackNavigationProp<StackParamList, 'Exam'>;
+type ExamScreenRouteProp = RouteProp<StackParamList, 'Exam'>;
 
 interface ExamScreenProps
 {
   navigation: ExamScreenNavigationProps;
 }
 
-function ExamScreen({ navigation } : ExamScreenProps): React.JSX.Element {
+function ExamScreen({ navigation } : ExamScreenProps): React.JSX.Element
+{
   const { width } = useWindowDimensions();
   const styles = Styles(width);
+  const route = useRoute<ExamScreenRouteProp>();
+  const { ExamBook } = route.params;
+
+  console.log(ExamBook.storageLink);
+
+  async function handleZipFile(filePath: string)
+  {
+    try
+    {
+      const targetPath = `${DocumentDirectoryPath}/unzipped`;
+      const unzippedPath = await unzip(filePath, targetPath);
+      const files = await RNFS.readDir(unzippedPath);
+
+      for (const file of files)
+      {
+        if (file.isFile()) {
+          console.log('파일 이름:', file.name);
+
+          const content = await RNFS.readFile(file.path, 'utf8');
+          console.log('내용:', content);
+        }
+      }
+    }
+    catch(error)
+    {
+      console.error('ZIP 처리 중 오류:', error);
+    }
+  }
+
+  useEffect(() => {
+    const filePath = ExamBook.storageLink;
+    handleZipFile(filePath);
+  }, []);
+
   return (
     <GestureHandlerRootView>
       <View style={styles.basic}>
         {width > 600 ? ( //분할화면
-          <View style={styles.splitScreen}>
-            <ScrollView style = {styles.scrollContainer} contentContainerStyle = {styles.scrollContent} keyboardShouldPersistTaps="handled">
-              <View style={styles.titlecontainer}>
-                <Mt title = "독(讀)한 녀석들" titleStyle = {styles.title}/>
-              </View>
-            </ScrollView>
-            <ScrollView style = {styles.scrollContainer} contentContainerStyle = {styles.scrollContent} keyboardShouldPersistTaps="handled">
-              <View style={styles.titlecontainer}>
-                <Mt title = "독(讀)한 녀석들" titleStyle = {styles.title}/>
-              </View>
-            </ScrollView>
-          </View>
+          <ExamSplitScreen />
         ) : ( //전체화면
-          <View style={styles.basic}>
-            <Mt title = "독한 녀석들" titleStyle = {styles.title}/>
-          </View>
+          <ExamFullScreen />
         )}
       </View>
     </GestureHandlerRootView>

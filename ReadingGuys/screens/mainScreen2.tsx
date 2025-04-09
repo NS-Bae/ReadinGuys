@@ -94,13 +94,11 @@ function Ms({ navigation } : MainScreenProps): React.JSX.Element {
   const movePage = (value: string) => {
     if(value === 'record')
     {
-      console.log('111111111111', value);
       navigation.navigate('Record', { RecordList: recordList });
     }
     else if(value === 'exam')
     {
-      console.log('222222222222222222222', value);
-      navigation.navigate('Exam');
+      navigation.navigate('Exam', { ExamBook: bookInfo });
     }
   };
   //시험기록 상세보기 모달창(미완)

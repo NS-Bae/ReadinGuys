@@ -4,6 +4,7 @@ const styles = (width: number) => StyleSheet.create({
   //기본
   basic: {
     flex: 1,
+    backgroundColor: 'aliceblue',
   },
   scrollContainer: {
     flex: 1,

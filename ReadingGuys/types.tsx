@@ -5,10 +5,16 @@ interface Records {
   WorkbookName: string;
   examDate: string;
 }
+interface BookData {
+  Difficulty: string;
+  storageLink: string;
+  workbookIdL: string;
+  workbookName: string;
+}
 export type StackParamList = {
   Main: any;
   Login: undefined;
   Home: undefined;
-  Record: { examData: Records[] };
-  Exam: any;
+  Record: { RecordList: Records[] };
+  Exam: { ExamBook: BookData };
 };

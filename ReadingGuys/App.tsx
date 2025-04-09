@@ -10,7 +10,7 @@ import notifee, { AndroidImportance, AndroidVisibility, EventType } from '@notif
 import HomeScreen from './screens/homeScreen';
 import LoginScreen from './screens/loginScreen';
 import MainScreen from './screens/mainScreen2';
-import CheckRecordScreen from './screens/fullScreen_CheckRecord';
+import CheckRecordScreen from './screens/fullScreen_CheckRecord.tsx';
 import ExamScreen from './screens/examScreen';
 import api from './api';
 
@@ -63,7 +63,7 @@ const App: React.FC = () => {
   useEffect(() => {
   // 포그라운드에서 푸시 알림을 클릭한 경우
   notifee.onBackgroundEvent(async ({ type, detail }) => {
-    if (type === EventType.ACTION_PRESS && detail.pressAction.id === 'update_workbook') {
+    if (type === EventType.ACTION_PRESS && detail.pressAction?.id === 'update_workbook') {
       console.log('Notification clicked:', detail.notification);
       // 푸시 알림 클릭 시 수행할 작업
     }
